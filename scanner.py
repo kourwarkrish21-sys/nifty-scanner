@@ -49,7 +49,14 @@ stocks = [
     "TATAMOTORS.NS","TATASTEEL.NS","TCS.NS","TECHM.NS",
     "TITAN.NS","TRENT.NS"
 ]
+# ----------------------------------
+# SAFE SERIES
+# ----------------------------------
 
+def clean_series(x):
+    if isinstance(x, pd.DataFrame):
+        return x.iloc[:, 0]
+    return x
 # ----------------------------------
 # RSI
 # ----------------------------------
@@ -81,7 +88,7 @@ def market_trend():
         progress=False
     )
 
-    close = nifty["Close"]
+    close = clean_series(nifty["Close"]).astype(float)
 
     ema20 = close.ewm(span=20).mean()
 
@@ -103,7 +110,7 @@ def options_signal(regime):
         progress=False
     )
 
-    close = nifty["Close"]
+    close = clean_series(nifty["Close"]).astype(float)
 
     last_close = float(close.iloc[-1])
 
@@ -139,8 +146,8 @@ def score_stock(symbol, regime, nifty_return):
         if len(df) < 30:
             return None
 
-        close = df["Close"]
-        volume = df["Volume"]
+       close = clean_series(df["Close"]).astype(float)
+volume = clean_series(df["Volume"]).astype(float)
 
         ema20 = close.ewm(span=20).mean()
 
@@ -193,7 +200,7 @@ def main():
         progress=False
     )
 
-    nifty_close = nifty["Close"]
+   nifty_close = clean_series(nifty["Close"]).astype(float)
 
     nifty_return = (
         nifty_close.iloc[-1] /
