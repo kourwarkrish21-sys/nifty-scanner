@@ -49,6 +49,7 @@ stocks = [
     "TATAMOTORS.NS","TATASTEEL.NS","TCS.NS","TECHM.NS",
     "TITAN.NS","TRENT.NS"
 ]
+
 # ----------------------------------
 # SAFE SERIES
 # ----------------------------------
@@ -57,6 +58,7 @@ def clean_series(x):
     if isinstance(x, pd.DataFrame):
         return x.iloc[:, 0]
     return x
+
 # ----------------------------------
 # RSI
 # ----------------------------------
@@ -92,7 +94,7 @@ def market_trend():
 
     ema20 = close.ewm(span=20).mean()
 
-    if close.iloc[-1] > ema20.iloc[-1]:
+    if float(close.iloc[-1]) > float(ema20.iloc[-1]):
         return "BULL"
 
     return "BEAR"
@@ -146,14 +148,14 @@ def score_stock(symbol, regime, nifty_return):
         if len(df) < 30:
             return None
 
-       close = clean_series(df["Close"]).astype(float)
-       volume = clean_series(df["Volume"]).astype(float)
+        close = clean_series(df["Close"]).astype(float)
+        volume = clean_series(df["Volume"]).astype(float)
 
         ema20 = close.ewm(span=20).mean()
 
         score = 0
 
-        if close.iloc[-1] > ema20.iloc[-1]:
+        if float(close.iloc[-1]) > float(ema20.iloc[-1]):
             score += 30
 
         stock_rsi = float(rsi(close).iloc[-1])
@@ -161,14 +163,14 @@ def score_stock(symbol, regime, nifty_return):
         if 55 < stock_rsi < 70:
             score += 20
 
-        avg_vol = volume.tail(20).mean()
+        avg_vol = float(volume.tail(20).mean())
 
-        if volume.iloc[-1] > avg_vol * 1.5:
+        if float(volume.iloc[-1]) > avg_vol * 1.5:
             score += 25
 
         stock_return = (
-            close.iloc[-1] /
-            close.iloc[-20] - 1
+            float(close.iloc[-1]) /
+            float(close.iloc[-20]) - 1
         )
 
         if stock_return > nifty_return:
@@ -200,11 +202,11 @@ def main():
         progress=False
     )
 
-   nifty_close = clean_series(nifty["Close"]).astype(float)
+    nifty_close = clean_series(nifty["Close"]).astype(float)
 
     nifty_return = (
-        nifty_close.iloc[-1] /
-        nifty_close.iloc[-20] - 1
+        float(nifty_close.iloc[-1]) /
+        float(nifty_close.iloc[-20]) - 1
     )
 
     results = []
