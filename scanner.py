@@ -174,7 +174,8 @@ def score_stock(symbol, regime, nifty_return):
             "rsi": round(stock_rsi, 2)
         }
 
-    except:
+    except Exception as e:
+        print(symbol, e)
         return None
 
 # ----------------------------------
@@ -221,18 +222,15 @@ def main():
 
     signal = options_signal(regime)
 
-  from datetime import datetime
-from zoneinfo import ZoneInfo
+    now = datetime.now(ZoneInfo("Asia/Kolkata"))
+    timestamp = now.strftime("%d-%m-%Y %I:%M:%S %p IST")
 
-now = datetime.now(ZoneInfo("Asia/Kolkata"))
-timestamp = now.strftime("%d-%m-%Y %I:%M:%S %p IST")
+    msg = (
+        f"📊 NIFTY QUANT SCANNER\n"
+        f"🕒 {timestamp}\n\n"
+    )
 
-msg = (
-    f"📊 NIFTY QUANT SCANNER\n"
-    f"🕒 {timestamp}\n\n"
-)
-
-msg += f"Market: {regime}\n\n"
+    msg += f"Market: {regime}\n\n"
 
     msg += "🏆 TOP STOCKS\n\n"
 
@@ -245,7 +243,8 @@ msg += f"Market: {regime}\n\n"
             f"RSI: {s['rsi']}\n\n"
         )
 
-    msg += f"🎯 {signal}"
+    msg += "🎯 OPTION SIGNAL\n"
+    msg += f"{signal}"
 
     send_telegram(msg)
 
