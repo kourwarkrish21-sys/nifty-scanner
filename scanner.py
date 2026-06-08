@@ -3,7 +3,7 @@ import requests
 import yfinance as yf
 import pandas as pd
 
-from datetime import datetime
+from datetime import datetime, time
 from zoneinfo import ZoneInfo
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -100,7 +100,7 @@ def market_trend():
     return "BEAR"
 
 # ----------------------------------
-# OPTIONS SIGNAL
+# OPTION SIGNAL
 # ----------------------------------
 
 def options_signal(regime):
@@ -193,6 +193,16 @@ def score_stock(symbol, regime, nifty_return):
 
 def main():
 
+    india_now = datetime.now(
+        ZoneInfo("Asia/Kolkata")
+    )
+
+    current_time = india_now.time()
+
+    if current_time < time(9, 15) or current_time > time(15, 30):
+        print("Outside market hours")
+        return
+
     regime = market_trend()
 
     nifty = yf.download(
@@ -202,7 +212,14 @@ def main():
         progress=False
     )
 
-    nifty_close = clean_series(nifty["Close"]).astype(float)
+    nifty_close = clean_series(
+        nifty["Close"]
+    ).astype(float)
+
+    nifty_price = round(
+        float(nifty_close.iloc[-1]),
+        2
+    )
 
     nifty_return = (
         float(nifty_close.iloc[-1]) /
@@ -227,29 +244,51 @@ def main():
         reverse=True
     )
 
-    top3 = results[:3]
+    top5 = results[:5]
 
     signal = options_signal(regime)
 
-    now = datetime.now(ZoneInfo("Asia/Kolkata"))
-    timestamp = now.strftime("%d-%m-%Y %I:%M:%S %p IST")
+    if signal == "NO TRADE":
+        print("No signal")
+        return
+
+    timestamp = india_now.strftime(
+        "%d-%m-%Y %I:%M:%S %p IST"
+    )
 
     msg = (
         f"📊 NIFTY QUANT SCANNER\n"
         f"🕒 {timestamp}\n\n"
     )
 
+    msg += f"NIFTY: {nifty_price}\n"
     msg += f"Market: {regime}\n\n"
 
-    msg += "🏆 TOP STOCKS\n\n"
+    msg += "🏆 TOP 5 STOCKS\n\n"
 
-    for i, s in enumerate(top3, start=1):
+    for i, s in enumerate(top5, start=1):
+
+        entry = s["price"]
+
+        sl = round(
+            entry * 0.99,
+            2
+        )
+
+        target = round(
+            entry + ((entry - sl) * 2),
+            2
+        )
 
         msg += (
             f"{i}. {s['stock']}\n"
             f"Score: {s['score']}\n"
             f"Price: ₹{s['price']}\n"
             f"RSI: {s['rsi']}\n\n"
+            f"Entry: ₹{entry}\n"
+            f"SL: ₹{sl}\n"
+            f"Target: ₹{target}\n"
+            f"R:R = 1:2\n\n"
         )
 
     msg += "🎯 OPTION SIGNAL\n"
