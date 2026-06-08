@@ -147,7 +147,7 @@ def score_stock(symbol, regime, nifty_return):
             return None
 
        close = clean_series(df["Close"]).astype(float)
-volume = clean_series(df["Volume"]).astype(float)
+       volume = clean_series(df["Volume"]).astype(float)
 
         ema20 = close.ewm(span=20).mean()
 
