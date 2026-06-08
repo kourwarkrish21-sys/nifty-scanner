@@ -2,7 +2,7 @@ name: Nifty Scanner
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/15 4-10 * * 1-5"
 
   workflow_dispatch:
 
@@ -26,4 +26,4 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
-          python scanner.py
+          python scanner.py         
